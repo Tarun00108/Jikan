@@ -33,6 +33,7 @@ class AnimeRepository @Inject constructor(private val api: JikanApi, private val
                     score = dto.score ?: 0.0,
                     rating = dto.rating ?: "N/A",
                     genres = genreString,
+                    cast = "Load details to see cast",
                     imageUrl = dto.images.jpg.imageUrl,
                     synopsis = dto.synopsis ?: "No synopsis available",
                     trailerUrl = dto.trailer?.embedUrl
@@ -54,6 +55,11 @@ class AnimeRepository @Inject constructor(private val api: JikanApi, private val
         return try {
             val response = api.getAnimeDetails(id)
             val dto = response.data
+            val charResponse = api.getAnimeCharacters(id)
+            val mainCast = charResponse.data
+                .filter { it.role == "Main" }
+                .map { it.character.name }
+                .joinToString(", ")
 
             val genreString = dto.genres?.joinToString(", ") { it.name } ?: "Unknown"
 
@@ -63,8 +69,9 @@ class AnimeRepository @Inject constructor(private val api: JikanApi, private val
                     title = dto.title,
                     episodes = dto.episodes ?: 0,
                     score = dto.score ?: 0.0,
-                    rating = dto.rating ?: "N/A", // Added
-                    genres = genreString,         // Added
+                    rating = dto.rating ?: "N/A",
+                    genres = genreString,
+                    cast =  mainCast.ifEmpty { "No main cast info" },
                     imageUrl = dto.images.jpg.imageUrl,
                     synopsis = dto.synopsis ?: "",
                     trailerUrl = dto.trailer?.embedUrl

@@ -9,4 +9,7 @@ interface JikanApi {
 
     @GET("anime/{id}")
     suspend fun getAnimeDetails(@Path("id") id: Int): AnimeDetailResponse
+
+    @GET("anime/{id}/characters")
+    suspend fun getAnimeCharacters(@Path("id") id: Int): CharacterResponse
 }

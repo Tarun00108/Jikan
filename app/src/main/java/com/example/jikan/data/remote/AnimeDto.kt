@@ -19,6 +19,22 @@ data class AnimeDto(
     @SerializedName("trailer") val trailer: Trailer?
 )
 
+
+data class CharacterResponse(
+    val data: List<CharacterDto>
+)
+
+data class CharacterDto(
+    val character: CharacterInfo,
+    val role: String
+)
+
+data class CharacterInfo(
+    val name: String,
+    @SerializedName("images") val images: CharacterImages
+)
+
+data class CharacterImages(val jpg: Jpg)
 data class Images(val jpg: Jpg)
 data class Jpg(@SerializedName("image_url") val imageUrl: String)
 data class Trailer(@SerializedName("embed_url") val embedUrl: String?)

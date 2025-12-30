@@ -154,7 +154,9 @@ fun AnimeDetailScreen(
                 Text(text = "Score: ${anime!!.score} | Episodes: ${anime!!.episodes}", style = MaterialTheme.typography.bodyLarge)
                 Text(text = "Age Rating: ${anime!!.rating}", style = MaterialTheme.typography.bodyMedium)
                 Text(text = "Genres: ${anime!!.genres}", style = MaterialTheme.typography.bodyMedium, color = Color.DarkGray)
-
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Main Cast:", style = MaterialTheme.typography.titleMedium)
+                Text(text = anime!!.cast, style = MaterialTheme.typography.bodyMedium)
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "Synopsis", style = MaterialTheme.typography.titleLarge)
                 Text(text = anime!!.synopsis)
