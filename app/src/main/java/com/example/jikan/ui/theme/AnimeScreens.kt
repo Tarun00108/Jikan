@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
@@ -76,7 +77,8 @@ fun AnimeList(
                         GlideImage(
                             model = anime.imageUrl,
                             contentDescription = null,
-                            modifier = Modifier.size(80.dp)
+                            modifier = Modifier.size(80.dp),
+                            contentScale = ContentScale.Crop
                         )
                     } else {
                         Box(
@@ -97,22 +99,31 @@ fun AnimeList(
         }
     }
 }
-
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun AnimeDetailScreen(
     viewModel: AnimeViewModel,
     animeId: String?
 ) {
+    LaunchedEffect(animeId) {
+        animeId?.toIntOrNull()?.let { id ->
+            viewModel.loadDetail(id)
+        }
+    }
+
     val anime by viewModel.selectedAnime.collectAsState()
 
     if (anime != null) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
 
-            if (anime!!.trailerUrl != null) {
+            if (!anime!!.trailerUrl.isNullOrEmpty()) {
                 AndroidView(factory = { context ->
                     WebView(context).apply {
                         settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        settings.loadWithOverviewMode = true
+                        settings.useWideViewPort = true
+                        settings.mediaPlaybackRequiresUserGesture = false
                         loadUrl(anime!!.trailerUrl!!)
                     }
                 }, modifier = Modifier.fillMaxWidth().height(250.dp))
@@ -120,7 +131,8 @@ fun AnimeDetailScreen(
                 GlideImage(
                     model = anime!!.imageUrl,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxWidth().height(250.dp)
+                    modifier = Modifier.fillMaxWidth().height(250.dp),
+                    contentScale = ContentScale.Fit
                 )
             }
 
@@ -135,8 +147,11 @@ fun AnimeDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "Synopsis", style = MaterialTheme.typography.titleLarge)
                 Text(text = anime!!.synopsis)
-
             }
+        }
+    } else {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
     }
 }
