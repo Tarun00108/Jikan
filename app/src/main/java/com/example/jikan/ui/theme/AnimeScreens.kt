@@ -1,6 +1,8 @@
 package com.example.jikan.ui.theme
 
+import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -117,16 +119,25 @@ fun AnimeDetailScreen(
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
 
             if (!anime!!.trailerUrl.isNullOrEmpty()) {
-                AndroidView(factory = { context ->
-                    WebView(context).apply {
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        settings.loadWithOverviewMode = true
-                        settings.useWideViewPort = true
-                        settings.mediaPlaybackRequiresUserGesture = false
-                        loadUrl(anime!!.trailerUrl!!)
-                    }
-                }, modifier = Modifier.fillMaxWidth().height(250.dp))
+                val finalUrl: String = getCorrectYouTubeWatchUrl(anime!!.trailerUrl!!)
+                Box(modifier = Modifier.fillMaxWidth().aspectRatio(16f/9f)) {
+                    AndroidView(
+                        factory = { context ->
+                            WebView(context).apply {
+                                settings.javaScriptEnabled = true
+                                settings.domStorageEnabled = true
+                                settings.loadWithOverviewMode = true
+                                settings.useWideViewPort = true
+                                settings.mediaPlaybackRequiresUserGesture = false
+                                webChromeClient = WebChromeClient()
+                                webViewClient = WebViewClient()
+
+                                loadUrl(finalUrl)
+                            }
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             } else {
                 GlideImage(
                     model = anime!!.imageUrl,
@@ -155,3 +166,22 @@ fun AnimeDetailScreen(
         }
     }
 }
+
+fun getCorrectYouTubeWatchUrl(inputUrl: String): String {
+    val regexList = listOf(
+        Regex("youtube\\.com/watch\\?v=([a-zA-Z0-9_-]{11})"),
+        Regex("youtu\\.be/([a-zA-Z0-9_-]{11})"),
+        Regex("youtube\\.com/embed/([a-zA-Z0-9_-]{11})"),
+        Regex("youtube-nocookie\\.com/embed/([a-zA-Z0-9_-]{11})")
+    )
+
+    for (regex in regexList) {
+        val match = regex.find(inputUrl)
+        if (match != null) {
+            val videoId = match.groupValues[1]
+            return "https://www.youtube.com/watch?v=$videoId&modestbranding=1&rel=0"
+        }
+    }
+    return ""
+}
+
